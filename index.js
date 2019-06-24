@@ -1,4 +1,6 @@
 var canvas = document.getElementById('canvas');
+canvas.width = canvas.clientWidth;
+canvas.height = canvas.clientHeight;
 var ctx = canvas.getContext('2d');
 
 function SpringSystem(nodes, edges) {
@@ -54,37 +56,45 @@ SpringSystem.prototype.updateSprings = function (xps, yps, xvs, yvs, ids1, ids2)
     var restDistance = 150;
 
     for (var i = 0; i < numSprings; ++i) {
-        var dx1 = xps[ids2[i]] - xps[ids1[i]];
-        var dy1 = yps[ids2[i]] - yps[ids1[i]];
-        var dvx1 = xvs[ids2[i]] - xvs[ids1[i]];
-        var dvy1 = yvs[ids2[i]] - yvs[ids1[i]];
-        var len1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
-        len1 = len1 || 1;
+        var x1, x2, vx1, vx2, y1, y2, vy1, vy2;
+        x1 = xps[ids1[i]];
+        x2 = xps[ids2[i]];
+        vx1 = xvs[ids1[i]];
+        vx2 = xvs[ids2[i]]
+        y1 = yps[ids1[i]];
+        y2 = yps[ids2[i]];
+        vy1 = yvs[ids1[i]];
+        vy2 = yvs[ids2[i]];
 
-        var nx1 = dx1 / len1;
-        var ny1 = dy1 / len1;
+        var dx = x2 - x1;
+        var dy = y2 - y1;
+        var distance = Math.sqrt(dx * dx + dy * dy);
 
-        var dx2 = xps[ids1[i]] - xps[ids2[i]];
-        var dy2 = yps[ids1[i]] - yps[ids2[i]];
-        var dvx2 = xvs[ids1[i]] - xvs[ids2[i]];
-        var dvy2 = yvs[ids1[i]] - yvs[ids2[i]];
-        var len2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
-        len2 = len2 || 1;
+        distance = distance || 1;
 
-        var nx2 = dx2 / len2;
-        var ny2 = dy2 / len2;
+        var normx1 = dx / distance;
+        var normy1 = dy / distance;
 
-        var fx1 = stiffness * (len1 - restDistance) * (nx1 / len1) - damping * dvx1;
-        var fy1 = stiffness * (len1 - restDistance) * (ny1 / len1) - damping * dvy1;
+        var normx2 = -normx1;
+        var normy2 = -normy1;
 
-        var fx2 = stiffness * (len1 - restDistance) * (nx2 / len1) - damping * dvx2;
-        var fy2 = stiffness * (len1 - restDistance) * (ny2 / len1) - damping * dvy2;
+        var v1x = vx1 - vx2;
+        var v1y = vy1 - vy2;
+
+        var v2x = -v1x;
+        var v2y = -v1y;
+
+        var fx1 = stiffness * (distance - restDistance) * (normx1 / distance) - damping * v1x;
+        var fy1 = stiffness * (distance - restDistance) * (normy1 / distance) - damping * v1y;
+
+        var fx2 = stiffness * (distance - restDistance) * (normx2 / distance) - damping * v2x;
+        var fy2 = stiffness * (distance - restDistance) * (normy2 / distance) - damping * v2y;
 
         xvs[ids1[i]] += fx1;
         yvs[ids1[i]] += fy1;
 
         xvs[ids2[i]] += fx2;
-        xvs[ids2[i]] += fy2;
+        yvs[ids2[i]] += fy2;
     }
 }
 
@@ -198,7 +208,7 @@ function getScaleFreeNetwork(nodeCount) {
 var {
     nodes,
     edges
-} = getScaleFreeNetwork(2000);
+} = getScaleFreeNetwork(20);
 
 var simulation = new SpringSystem(nodes, edges);
 
