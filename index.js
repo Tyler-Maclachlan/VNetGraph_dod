@@ -9,9 +9,9 @@ function SpringSystem(nodes, edges) {
     this.numAttractions = this.numNodes * (this.numNodes / 2) - (this.numNodes / 2);
     this.totalTime = 0;
 
-    var buf = new ArrayBuffer(this.numSprings * 8);
-    var nBuf = new ArrayBuffer(this.numNodes * 3 * 3 * 4 + this.numNodes * 2);
-    var aBuf = new ArrayBuffer(this.numAttractions * 8);
+    var buf = new ArrayBuffer(this.numSprings * 2 * 4 + this.numSprings * 2);
+    var nBuf = new ArrayBuffer(this.numNodes * 2 * 3 * 4 + this.numNodes * 2);
+    // var aBuf = new ArrayBuffer(this.numAttractions * 8);
 
     this.nodeIdIndexMap = new Map();
     this.edgeIdIndexMap = new Map();
@@ -27,19 +27,19 @@ function SpringSystem(nodes, edges) {
     this.sIds1 = new Float32Array(buf, (0 * this.numSprings) * 4, this.numSprings);
     this.sIds2 = new Float32Array(buf, (1 * this.numSprings) * 4, this.numSprings);
 
-    this.aIds1 = new Float32Array(aBuf, (0 * this.numAttractions) * 4, this.numAttractions);
-    this.aIds2 = new Float32Array(aBuf, (1 * this.numAttractions) * 4, this.numAttractions);
+    // this.aIds1 = new Float32Array(aBuf, (0 * this.numAttractions) * 4, this.numAttractions);
+    // this.aIds2 = new Float32Array(aBuf, (1 * this.numAttractions) * 4, this.numAttractions);
 
     for (var i = 0; i < this.numNodes; ++i) {
         var attrIndex = 0;
         this.nxps[i] = this.nxps[i] = Math.random() * window.innerWidth;
         this.nyps[i] = this.nyts[i] = Math.random() * window.innerHeight;
         this.nodeIdIndexMap.set(nodes[i].id, i);
-        for (var c = i + 1; c < this.numNodes; ++c) {
-            this.aIds1[attrIndex] = i;
-            this.aIds2[attrIndex] = c;
-            attrIndex++;
-        }
+        // for (var c = i + 1; c < this.numNodes; ++c) {
+        //     this.aIds1[attrIndex] = i;
+        //     this.aIds2[attrIndex] = c;
+        //     attrIndex++;
+        // }
     }
 
     for (var i = 0; i < this.numSprings; ++i) {
@@ -53,7 +53,7 @@ SpringSystem.prototype.updateSprings = function (xps, yps, xvs, yvs, ids1, ids2)
     var numSprings = this.numSprings >>> 0;
     var stiffness = 10;
     var damping = 0.03;
-    var restDistance = 150;
+    var restDistance = 200;
 
     for (var i = 0; i < numSprings; ++i) {
         var x1, x2, vx1, vx2, y1, y2, vy1, vy2;
@@ -102,8 +102,8 @@ SpringSystem.prototype.updateNodes = function (xps, yps, xvs, yvs) {
     var numNodes = this.numNodes >>> 0;
 
     for (var i = 0; i < numNodes; ++i) {
-        xvs[i] = xvs[i] > 0.0001 ? xvs[i] : 0;
-        yvs[i] = yvs[i] > 0.0001 ? yvs[i] : 0;
+        xvs[i] = Math.abs(xvs[i]) > 0.0001 ? xvs[i] : 0;
+        yvs[i] = Math.abs(yvs[i]) > 0.0001 ? yvs[i] : 0;
 
         xps[i] += xvs[i];
         yps[i] += yvs[i];
@@ -208,7 +208,7 @@ function getScaleFreeNetwork(nodeCount) {
 var {
     nodes,
     edges
-} = getScaleFreeNetwork(20);
+} = getScaleFreeNetwork(10);
 
 var simulation = new SpringSystem(nodes, edges);
 
